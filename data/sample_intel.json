@@ -1,0 +1,207 @@
+{
+  "query": "example.com",
+  "query_type": "domain",
+  "timestamp": "2026-04-06 14:30",
+  "summary": {
+    "risk_level": "Medium",
+    "sources_queried": 11,
+    "sources_with_results": 1,
+    "key_findings": [
+      "GitHub repository 'example-recon' found mentioning domain"
+    ]
+  },
+  "modules": {
+    "github": {
+      "status": "success",
+      "result_count": 1,
+      "error": null,
+      "data": {
+        "user": null,
+        "repositories": [
+          {
+            "name": "example-recon",
+            "description": "Repository mentioning example domain",
+            "url": "https://github.com/sample/example-recon",
+            "language": "Python",
+            "stars": 7,
+            "owner": "sample"
+          }
+        ]
+      }
+    },
+    "maigret": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "username": "",
+        "accounts": [],
+        "pdf_file": "",
+        "pdf_download_path": ""
+      },
+      "raw_output": ""
+    },
+    "whois": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "domain_name": "N/A",
+        "registrar": "N/A",
+        "creation_date": "N/A",
+        "updated_date": "N/A",
+        "expiration_date": "N/A",
+        "name_servers": [],
+        "status_list": [],
+        "emails": [],
+        "country": "N/A",
+        "org": "N/A",
+        "registry_domain_id": "N/A",
+        "registrar_whois_server": "N/A",
+        "registrar_url": "N/A",
+        "registrar_iana_id": "N/A",
+        "dnssec": "N/A",
+        "whois_database_last_update": "N/A",
+        "registrant_contact": "N/A",
+        "tech_contact": "N/A",
+        "abuse_contact_email": "N/A",
+        "abuse_contact_phone": "N/A",
+        "icann_complaint_form": "N/A",
+        "raw_text": ""
+      }
+    },
+    "shodan": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "host": "N/A",
+        "organization": "N/A",
+        "open_ports": [],
+        "services": []
+      }
+    },
+    "virustotal": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "id": "example.com",
+        "type": "domain",
+        "reputation": null,
+        "country": null,
+        "as_owner": null,
+        "registrar": null,
+        "categories": {},
+        "tags": [],
+        "last_analysis_stats": {
+          "malicious": 0,
+          "suspicious": 0,
+          "undetected": 0,
+          "harmless": 0,
+          "timeout": 0
+        }
+      }
+    },
+    "theharvester": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "emails": [],
+        "hosts": [],
+        "ips": [],
+        "urls": [],
+        "asns": []
+      },
+      "raw_output": ""
+    },
+    "subfinder": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "subdomains": [],
+        "subdomains_file": ""
+      },
+      "raw_output": ""
+    },
+    "otx": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "indicator": "example.com",
+        "indicator_type": "domain",
+        "pulse_count": 0,
+        "country_code": "N/A",
+        "reputation": "N/A",
+        "related": {
+          "malware_count": 0,
+          "url_count": 0,
+          "passive_dns_count": 0
+        }
+      }
+    },
+    "censys": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "host": "N/A",
+        "location": "N/A",
+        "autonomous_system": "N/A",
+        "operating_system": "N/A",
+        "services": []
+      }
+    },
+    "holehe": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "found_on": [],
+        "raw_output": ""
+      }
+    },
+    "ghunt": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "email": "",
+        "profile_picture": "",
+        "last_profile_edit": "",
+        "gaia_id": "",
+        "activated_services": [],
+        "maps_profile": "",
+        "calendar": "",
+        "raw_output": ""
+      }
+    },
+    "userscanner": {
+      "status": "no_results",
+      "result_count": 0,
+      "error": null,
+      "data": {
+        "found_on": [],
+        "total_hits": 0,
+        "raw_output": ""
+      }
+    }
+  },
+  "raw_output": {
+    "github": {},
+    "whois": {},
+    "shodan": {},
+    "virustotal": {},
+    "otx": {},
+    "theharvester": {},
+    "censys": {},
+    "subfinder": {},
+    "maigret": {},
+    "holehe": {},
+    "ghunt": {},
+    "userscanner": {}
+  }
+}

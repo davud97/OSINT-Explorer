@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}OSINT Explorer{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/script.js') }}"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-inner">
+                <div class="brand">
+                    <div class="brand-mark">OE</div>
+                    <div>
+                        <div class="brand-name">OSINT Explorer</div>
+                        <div class="brand-subtitle">Intelligence Workspace</div>
+                    </div>
+                </div>
+
+                <nav class="sidebar-nav">
+                    <a href="{{ url_for('home') }}" class="nav-link">New Search</a>
+                    <a href="{{ url_for('results') }}" class="nav-link">Results Dashboard</a>
+                    <a href="#" class="nav-link">Sources</a>
+                    <a href="#" class="nav-link">History</a>
+                    <a href="#" class="nav-link">Settings</a>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,977 @@
+{% extends "base.html" %}
+
+{% block title %}OSINT Explorer | Results{% endblock %}
+
+{% block content %}
+<header class="topbar topbar-split">
+    <div>
+        <h1 class="page-title">Results Dashboard</h1>
+        <p class="page-description">
+            Structured intelligence findings for the submitted indicator.
+        </p>
+    </div>
+
+    <form action="{{ url_for('results') }}" method="POST" class="inline-search-form">
+        <input type="text" name="query" value="{{ intel.query }}" placeholder="Search again" required>
+        <select name="query_type" required>
+            <option value="domain" {% if intel.query_type == "domain" %}selected{% endif %}>Domain</option>
+            <option value="ip" {% if intel.query_type == "ip" %}selected{% endif %}>IP Address</option>
+            <option value="email" {% if intel.query_type == "email" %}selected{% endif %}>Email</option>
+            <option value="username" {% if intel.query_type == "username" %}selected{% endif %}>Username</option>
+        </select>
+        <button type="submit" class="btn-primary">Search</button>
+    </form>
+</header>
+
+<section class="panel">
+    <div class="panel-header">
+        <h2>Search Summary</h2>
+    </div>
+
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Query</span>
+            <strong>{{ intel.query }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Query Type</span>
+            <strong>{{ intel.query_type }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Timestamp</span>
+            <strong>{{ intel.timestamp }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Risk Level</span>
+            <strong class="risk risk-{{ intel.summary.risk_level|lower }}">{{ intel.summary.risk_level }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Sources Queried</span>
+            <strong>{{ intel.summary.sources_queried }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Sources With Results</span>
+            <strong>{{ intel.summary.sources_with_results }}</strong>
+        </div>
+    </div>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <h2>Key Findings</h2>
+    </div>
+
+    <ul class="findings-list">
+        {% for finding in intel.summary.key_findings %}
+            <li>{{ finding }}</li>
+        {% endfor %}
+    </ul>
+</section>
+
+{% if intel.modules.github %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>GitHub Intelligence</h2>
+        <span class="status-badge">{{ intel.modules.github.status }}</span>
+    </div>
+
+    {% if intel.modules.github.error %}
+    <p class="empty-state">{{ intel.modules.github.error }}</p>
+    {% endif %}
+
+    {% if intel.modules.github.data.user %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Username</span>
+            <strong>{{ intel.modules.github.data.user.login }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Account Type</span>
+            <strong>{{ intel.modules.github.data.user.account_type }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Public Repositories</span>
+            <strong>{{ intel.modules.github.data.user.public_repos }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Followers</span>
+            <strong>{{ intel.modules.github.data.user.followers }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Following</span>
+            <strong>{{ intel.modules.github.data.user.following }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Profile</span>
+            <strong>
+                <a href="{{ intel.modules.github.data.user.profile_url }}" target="_blank">Open Profile</a>
+            </strong>
+        </div>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.github.data.repositories %}
+    <div class="table-wrap" style="margin-top: 16px;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Repository</th>
+                    <th>Description</th>
+                    <th>Language</th>
+                    <th>Stars</th>
+                    <th>Owner</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for repo in intel.modules.github.data.repositories %}
+                <tr>
+                    <td>{{ repo.name }}</td>
+                    <td>{{ repo.description or "No description" }}</td>
+                    <td>{{ repo.language or "N/A" }}</td>
+                    <td>{{ repo.stars }}</td>
+                    <td>{{ repo.owner }}</td>
+                    <td><a href="{{ repo.url }}" target="_blank">Open</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% elif not intel.modules.github.data.user and not intel.modules.github.error %}
+    <p class="empty-state">No GitHub records available for the current search.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if intel.modules.maigret and intel.query_type == "username" %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>Maigret Username Investigation</h2>
+        <span class="status-badge">{{ intel.modules.maigret.status }}</span>
+    </div>
+
+    {% if intel.modules.maigret.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Username</span>
+            <strong>{{ intel.modules.maigret.data.username }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Claimed Accounts Found</span>
+            <strong>{{ intel.modules.maigret.data.accounts | length }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">PDF Report</span>
+            <strong>
+                {% if intel.modules.maigret.data.pdf_download_path %}
+                    <a href="{{ intel.modules.maigret.data.pdf_download_path }}">Download PDF</a>
+                {% else %}
+                    Not available
+                {% endif %}
+            </strong>
+        </div>
+    </div>
+
+    {% if intel.modules.maigret.data.accounts %}
+    <div class="table-wrap" style="margin-top: 16px;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Platform</th>
+                    <th>Profile URL</th>
+                    <th>Status</th>
+                    <th>Tags</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for account in intel.modules.maigret.data.accounts %}
+                <tr>
+                    <td>{{ account.site }}</td>
+                    <td>
+                        {% if account.url %}
+                            <a href="{{ account.url }}" target="_blank" rel="noopener noreferrer">Open Profile</a>
+                        {% else %}
+                            N/A
+                        {% endif %}
+                    </td>
+                    <td>{{ account.status or "N/A" }}</td>
+                    <td>{{ account.tags | join(', ') if account.tags else "N/A" }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No claimed accounts were available to display.</p>
+    {% endif %}
+
+    {% elif intel.modules.maigret.status == "error" %}
+    <p class="empty-state">
+        Maigret could not be completed.
+        {% if intel.modules.maigret.error %}
+            <br>Error: {{ intel.modules.maigret.error }}
+        {% endif %}
+    </p>
+
+    {% elif intel.modules.maigret.status == "no_results" %}
+    <p class="empty-state">No claimed accounts were identified for this username.</p>
+
+    {% else %}
+    <p class="empty-state">Maigret is not applicable for this query type.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if intel.modules.whois and intel.query_type == "domain" %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>Domain Registration</h2>
+        <span class="status-badge">{{ intel.modules.whois.status }}</span>
+    </div>
+
+    {% if intel.modules.whois.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Domain</span>
+            <strong>{{ intel.modules.whois.data.domain_name }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Registrar</span>
+            <strong>{{ intel.modules.whois.data.registrar }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Organization</span>
+            <strong>{{ intel.modules.whois.data.org }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Country</span>
+            <strong>{{ intel.modules.whois.data.country }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Creation Date</span>
+            <strong>{{ intel.modules.whois.data.creation_date }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Updated Date</span>
+            <strong>{{ intel.modules.whois.data.updated_date }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Expiration Date</span>
+            <strong>{{ intel.modules.whois.data.expiration_date }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Registry Domain ID</span>
+            <strong>{{ intel.modules.whois.data.registry_domain_id }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Registrar WHOIS Server</span>
+            <strong>{{ intel.modules.whois.data.registrar_whois_server }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Registrar URL</span>
+            <strong>{{ intel.modules.whois.data.registrar_url }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Registrar IANA ID</span>
+            <strong>{{ intel.modules.whois.data.registrar_iana_id }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">DNSSEC</span>
+            <strong>{{ intel.modules.whois.data.dnssec }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">WHOIS Database Last Update</span>
+            <strong>{{ intel.modules.whois.data.whois_database_last_update }}</strong>
+        </div>
+    </div>
+
+    {% if intel.modules.whois.data.name_servers %}
+    <div class="list-block">
+        <h3>Name Servers</h3>
+        <ul class="plain-list">
+            {% for server in intel.modules.whois.data.name_servers %}
+            <li>{{ server }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.whois.data.status_list %}
+    <div class="list-block">
+        <h3>Domain Status</h3>
+        <ul class="plain-list">
+            {% for item in intel.modules.whois.data.status_list %}
+            <li>{{ item }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.whois.data.emails %}
+    <div class="list-block">
+        <h3>WHOIS Contact References</h3>
+        <ul class="plain-list">
+            {% for email in intel.modules.whois.data.emails %}
+            <li>{{ email }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.whois.data.registrant_contact != "N/A" or intel.modules.whois.data.tech_contact != "N/A" %}
+    <div class="list-block">
+        <h3>Additional Contact References</h3>
+        <ul class="plain-list">
+            {% if intel.modules.whois.data.registrant_contact != "N/A" %}
+            <li>Registrant Contact: {{ intel.modules.whois.data.registrant_contact }}</li>
+            {% endif %}
+            {% if intel.modules.whois.data.tech_contact != "N/A" %}
+            <li>Technical Contact: {{ intel.modules.whois.data.tech_contact }}</li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.whois.data.abuse_contact_email != "N/A" or intel.modules.whois.data.abuse_contact_phone != "N/A" %}
+    <div class="list-block">
+        <h3>Registrar Abuse Contact</h3>
+        <ul class="plain-list">
+            {% if intel.modules.whois.data.abuse_contact_email != "N/A" %}
+            <li>Email: {{ intel.modules.whois.data.abuse_contact_email }}</li>
+            {% endif %}
+            {% if intel.modules.whois.data.abuse_contact_phone != "N/A" %}
+            <li>Phone: {{ intel.modules.whois.data.abuse_contact_phone }}</li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.whois.data.icann_complaint_form != "N/A" %}
+    <div class="list-block">
+        <h3>ICANN Complaint Reference</h3>
+        <ul class="plain-list">
+            <li>{{ intel.modules.whois.data.icann_complaint_form }}</li>
+        </ul>
+    </div>
+    {% endif %}
+
+    {% elif intel.modules.whois.status == "error" %}
+    <p class="empty-state">
+        WHOIS lookup could not be completed for this domain.
+        {% if intel.modules.whois.error %}
+            <br>Error: {{ intel.modules.whois.error }}
+        {% endif %}
+    </p>
+    {% else %}
+    <p class="empty-state">No WHOIS data available for the current domain query.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if intel.modules.virustotal and intel.query_type in ["domain", "ip", "url"] %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>VirusTotal Reputation</h2>
+        <span class="status-badge">{{ intel.modules.virustotal.status }}</span>
+    </div>
+
+    {% if intel.modules.virustotal.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Indicator ID</span>
+            <strong>{{ intel.modules.virustotal.data.id or "N/A" }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Type</span>
+            <strong>{{ intel.modules.virustotal.data.type or "N/A" }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Reputation</span>
+            <strong>{{ intel.modules.virustotal.data.reputation if intel.modules.virustotal.data.reputation is not none else "N/A" }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Country</span>
+            <strong>{{ intel.modules.virustotal.data.country or "N/A" }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">AS Owner</span>
+            <strong>{{ intel.modules.virustotal.data.as_owner or "N/A" }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Registrar</span>
+            <strong>{{ intel.modules.virustotal.data.registrar or "N/A" }}</strong>
+        </div>
+    </div>
+
+    {% if intel.modules.virustotal.data.last_analysis_stats %}
+    <div class="list-block">
+        <h3>Last Analysis Stats</h3>
+        <ul class="plain-list">
+            {% for key, value in intel.modules.virustotal.data.last_analysis_stats.items() %}
+            <li>{{ key }}: {{ value }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% elif intel.modules.virustotal.status == "error" %}
+    <p class="empty-state">
+        VirusTotal lookup could not be completed.
+        {% if intel.modules.virustotal.error %}
+            <br>Error: {{ intel.modules.virustotal.error }}
+        {% endif %}
+    </p>
+    {% else %}
+    <p class="empty-state">No VirusTotal data available for this query.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if intel.modules.shodan and intel.query_type == "ip" %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>Internet Exposure</h2>
+        <span class="status-badge">{{ intel.modules.shodan.status }}</span>
+    </div>
+
+    {% if intel.modules.shodan.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Host</span>
+            <strong>{{ intel.modules.shodan.data.host }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Organization</span>
+            <strong>{{ intel.modules.shodan.data.organization }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Open Ports</span>
+            <strong>{{ intel.modules.shodan.data.open_ports | join(', ') if intel.modules.shodan.data.open_ports else "N/A" }}</strong>
+        </div>
+    </div>
+
+    {% if intel.modules.shodan.data.services %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Port</th>
+                    <th>Service</th>
+                    <th>Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in intel.modules.shodan.data.services %}
+                <tr>
+                    <td>{{ service.port }}</td>
+                    <td>{{ service.service }}</td>
+                    <td>{{ service.product }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% elif intel.modules.shodan.status == "error" %}
+    <p class="empty-state">
+        Shodan lookup could not be completed.
+        {% if intel.modules.shodan.error %}
+            <br>Error: {{ intel.modules.shodan.error }}
+        {% endif %}
+    </p>
+    {% else %}
+    <p class="empty-state">No Shodan data available for this query.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if intel.modules.otx and intel.query_type in ["domain", "ip"] %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>OTX Threat Intelligence</h2>
+        <span class="status-badge">{{ intel.modules.otx.status }}</span>
+    </div>
+
+    {% if intel.modules.otx.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Indicator</span>
+            <strong>{{ intel.modules.otx.data.indicator }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Indicator Type</span>
+            <strong>{{ intel.modules.otx.data.indicator_type }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Pulse Count</span>
+            <strong>{{ intel.modules.otx.data.pulse_count }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Country Code</span>
+            <strong>{{ intel.modules.otx.data.country_code }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Reputation</span>
+            <strong>{{ intel.modules.otx.data.reputation }}</strong>
+        </div>
+    </div>
+
+    <div class="list-block">
+        <h3>Related Observations</h3>
+        <ul class="plain-list">
+            <li>Malware References: {{ intel.modules.otx.data.related.malware_count }}</li>
+            <li>URL References: {{ intel.modules.otx.data.related.url_count }}</li>
+            <li>Passive DNS Records: {{ intel.modules.otx.data.related.passive_dns_count }}</li>
+        </ul>
+    </div>
+
+    {% elif intel.modules.otx.status == "error" %}
+    <p class="empty-state">
+        OTX lookup could not be completed.
+        {% if intel.modules.otx.error %}
+            <br>Error: {{ intel.modules.otx.error }}
+        {% endif %}
+    </p>
+    {% elif intel.modules.otx.status == "no_results" %}
+    <p class="empty-state">
+        No related threat intelligence references were returned by OTX for this indicator.
+    </p>
+    {% else %}
+    <p class="empty-state">OTX is not applicable for this query type.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if intel.modules.theharvester and intel.query_type in ["domain", "email"] %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>theHarvester Collection</h2>
+        <span class="status-badge">{{ intel.modules.theharvester.status }}</span>
+    </div>
+
+    {% if intel.modules.theharvester.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Hosts Found</span>
+            <strong>{{ intel.modules.theharvester.data.hosts | length }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Emails Found</span>
+            <strong>{{ intel.modules.theharvester.data.emails | length }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">IPs Found</span>
+            <strong>{{ intel.modules.theharvester.data.ips | length }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">URLs Found</span>
+            <strong>{{ intel.modules.theharvester.data.urls | length }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">ASNs Found</span>
+            <strong>{{ intel.modules.theharvester.data.asns | length }}</strong>
+        </div>
+    </div>
+
+    {% if intel.modules.theharvester.data.hosts %}
+    <div class="list-block">
+        <h3>Discovered Hosts</h3>
+        <ul class="plain-list">
+            {% for host in intel.modules.theharvester.data.hosts[:30] %}
+            <li>{{ host }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.theharvester.data.emails %}
+    <div class="list-block">
+        <h3>Discovered Emails</h3>
+        <ul class="plain-list">
+            {% for email in intel.modules.theharvester.data.emails[:20] %}
+            <li>{{ email }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.theharvester.data.ips %}
+    <div class="list-block">
+        <h3>Discovered IPs</h3>
+        <ul class="plain-list">
+            {% for ip in intel.modules.theharvester.data.ips[:20] %}
+            <li>{{ ip }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.theharvester.data.asns %}
+    <div class="list-block">
+        <h3>Discovered ASNs</h3>
+        <ul class="plain-list">
+            {% for asn in intel.modules.theharvester.data.asns[:20] %}
+            <li>{{ asn }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.theharvester.data.urls %}
+    <div class="list-block">
+        <h3>Discovered URLs</h3>
+        <ul class="plain-list">
+            {% for url in intel.modules.theharvester.data.urls[:20] %}
+            <li>{{ url }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% elif intel.modules.theharvester.status == "error" %}
+    <p class="empty-state">
+        theHarvester could not be completed.
+        {% if intel.modules.theharvester.error %}
+            <br>Error: {{ intel.modules.theharvester.error }}
+        {% endif %}
+    </p>
+    {% else %}
+    <p class="empty-state">No theHarvester data available for this query.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if intel.modules.subfinder and intel.query_type == "domain" %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>Subdomain Discovery</h2>
+        <span class="status-badge">{{ intel.modules.subfinder.status }}</span>
+    </div>
+
+    {% if intel.modules.subfinder.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Subdomains Found</span>
+            <strong>{{ intel.modules.subfinder.data.subdomains | length }}</strong>
+        </div>
+    </div>
+
+    {% if intel.modules.subfinder.data.subdomains %}
+    <div class="list-block">
+        <h3>Discovered Subdomains</h3>
+        <ul class="plain-list">
+            {% for subdomain in intel.modules.subfinder.data.subdomains[:15] %}
+            <li>{{ subdomain }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% elif intel.modules.subfinder.status == "error" %}
+    <p class="empty-state">
+        Subfinder could not be completed.
+        {% if intel.modules.subfinder.error %}
+            <br>Error: {{ intel.modules.subfinder.error }}
+        {% endif %}
+    </p>
+    {% elif intel.modules.subfinder.status == "no_results" %}
+    <p class="empty-state">No subdomains were returned for the current domain query.</p>
+    {% else %}
+    <p class="empty-state">Subdomain discovery is not applicable for this query type.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+
+
+{% if intel.modules.censys and intel.query_type == "ip" %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>Censys Exposure Intelligence</h2>
+        <span class="status-badge">{{ intel.modules.censys.status }}</span>
+    </div>
+
+    {% if intel.modules.censys.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Host</span>
+            <strong>{{ intel.modules.censys.data.host }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Location</span>
+            <strong>{{ intel.modules.censys.data.location }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Autonomous System</span>
+            <strong>{{ intel.modules.censys.data.autonomous_system }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Operating System</span>
+            <strong>{{ intel.modules.censys.data.operating_system }}</strong>
+        </div>
+    </div>
+
+    {% if intel.modules.censys.data.services %}
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Port</th>
+                    <th>Service</th>
+                    <th>Transport</th>
+                    <th>Product</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for service in intel.modules.censys.data.services %}
+                <tr>
+                    <td>{{ service.port }}</td>
+                    <td>{{ service.service_name }}</td>
+                    <td>{{ service.transport_protocol }}</td>
+                    <td>{{ service.product }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    {% elif intel.modules.censys.status == "error" %}
+    <p class="empty-state">
+        Censys lookup could not be completed.
+        {% if intel.modules.censys.error %}
+            <br>Error: {{ intel.modules.censys.error }}
+        {% endif %}
+    </p>
+    {% elif intel.modules.censys.status == "no_results" %}
+    <p class="empty-state">
+        No external exposure details were returned by Censys for this IP address.
+    </p>
+    {% else %}
+    <p class="empty-state">Censys is not applicable for this query type.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+{% if intel.modules.holehe and intel.query_type == "email" %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>Holehe Email Investigation</h2>
+        <span class="status-badge">{{ intel.modules.holehe.status }}</span>
+    </div>
+
+    {% if intel.modules.holehe.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Email</span>
+            <strong>{{ intel.query }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Platforms Found</span>
+            <strong>{{ intel.modules.holehe.data.found_on | length }}</strong>
+        </div>
+    </div>
+
+    {% if intel.modules.holehe.data.found_on %}
+    <div class="table-wrap" style="margin-top: 16px;">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Platform</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for platform in intel.modules.holehe.data.found_on %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ platform }}</td>
+                    <td>Registered</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No platform registrations were found for this email.</p>
+    {% endif %}
+
+    {% elif intel.modules.holehe.status == "no_results" %}
+    <p class="empty-state">No platform registrations were found for this email.</p>
+
+    {% elif intel.modules.holehe.status == "error" %}
+    <p class="empty-state">
+        Holehe could not be completed.
+        {% if intel.modules.holehe.error %}
+            <br>Error: {{ intel.modules.holehe.error }}
+        {% endif %}
+    </p>
+
+    {% else %}
+    <p class="empty-state">Holehe is not applicable for this query type.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+
+
+{% if intel.modules.ghunt and intel.query_type == "email" %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>GHunt Google Account Intelligence</h2>
+        <span class="status-badge">{{ intel.modules.ghunt.status }}</span>
+    </div>
+
+    {% if intel.modules.ghunt.status == "success" %}
+
+    {% if intel.modules.ghunt.data.profile_picture %}
+    <div style="margin-bottom: 16px;">
+        <img src="{{ intel.modules.ghunt.data.profile_picture }}" alt="Profile Picture"
+             style="width: 80px; height: 80px; border-radius: 50%; border: 2px solid var(--border);">
+    </div>
+    {% endif %}
+
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Email</span>
+            <strong>{{ intel.modules.ghunt.data.email }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Gaia ID</span>
+            <strong>{{ intel.modules.ghunt.data.gaia_id or "N/A" }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Last Profile Edit</span>
+            <strong>{{ intel.modules.ghunt.data.last_profile_edit or "N/A" }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Calendar</span>
+            <strong>{{ intel.modules.ghunt.data.calendar or "N/A" }}</strong>
+        </div>
+        {% if intel.modules.ghunt.data.maps_profile %}
+        <div class="summary-item">
+            <span class="summary-label">Maps Profile</span>
+            <strong><a href="{{ intel.modules.ghunt.data.maps_profile }}" target="_blank">Open Profile</a></strong>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if intel.modules.ghunt.data.activated_services %}
+    <div class="list-block">
+        <h3>Activated Google Services</h3>
+        <ul class="plain-list">
+            {% for service in intel.modules.ghunt.data.activated_services %}
+            <li>{{ service }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if intel.modules.ghunt.data.reviews is defined %}
+    <div class="list-block">
+        <h3>Google Maps Activity</h3>
+        <ul class="plain-list">
+            <li>Reviews: {{ intel.modules.ghunt.data.reviews }}</li>
+            <li>Ratings: {{ intel.modules.ghunt.data.ratings }}</li>
+            <li>Photos: {{ intel.modules.ghunt.data.photos }}</li>
+            <li>Videos: {{ intel.modules.ghunt.data.videos }}</li>
+            <li>Answers: {{ intel.modules.ghunt.data.answers }}</li>
+            <li>Edits: {{ intel.modules.ghunt.data.edits }}</li>
+        </ul>
+    </div>
+    {% endif %}
+
+    {% elif intel.modules.ghunt.status == "error" %}
+    <p class="empty-state">
+        GHunt could not be completed.
+        {% if intel.modules.ghunt.error %}
+            <br>Error: {{ intel.modules.ghunt.error }}
+        {% endif %}
+    </p>
+
+    {% elif intel.modules.ghunt.status == "no_results" %}
+    <p class="empty-state">No Google account intelligence was returned for this email.</p>
+
+    {% else %}
+    <p class="empty-state">GHunt is not applicable for this query type.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+
+{% if intel.modules.userscanner and intel.query_type == "email" %}
+<section class="panel">
+    <div class="panel-header">
+        <h2>User Scanner</h2>
+        <span class="status-badge">{{ intel.modules.userscanner.status }}</span>
+    </div>
+
+    {% if intel.modules.userscanner.status == "success" %}
+    <div class="summary-grid">
+        <div class="summary-item">
+            <span class="summary-label">Email</span>
+            <strong>{{ intel.query }}</strong>
+        </div>
+        <div class="summary-item">
+            <span class="summary-label">Total Hits</span>
+            <strong>{{ intel.modules.userscanner.data.total_hits }}</strong>
+        </div>
+    </div>
+
+    {% if intel.modules.userscanner.data.found_on %}
+    <div class="table-wrap" style="margin-top: 16px;">
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Platform</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for entry in intel.modules.userscanner.data.found_on %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ entry.site }}</td>
+                    <td>{{ entry.category }}</td>
+                    <td>{{ entry.status }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p class="empty-state">No registrations were found for this email.</p>
+    {% endif %}
+
+    {% elif intel.modules.userscanner.status == "no_results" %}
+    <p class="empty-state">No results were returned by User Scanner for this email.</p>
+
+    {% elif intel.modules.userscanner.status == "error" %}
+    <p class="empty-state">
+        User Scanner could not be completed.
+        {% if intel.modules.userscanner.error %}
+            <br>Error: {{ intel.modules.userscanner.error }}
+        {% endif %}
+    </p>
+
+    {% else %}
+    <p class="empty-state">User Scanner is not applicable for this query type.</p>
+    {% endif %}
+</section>
+{% endif %}
+
+<section class="panel">
+    <div class="panel-header">
+        <h2>Raw Output</h2>
+    </div>
+
+    <details class="raw-block">
+        <summary>View raw collection output</summary>
+        <pre>{{ intel.raw_output | tojson(indent=2) }}</pre>
+    </details>
+</section>
+{% endblock %}

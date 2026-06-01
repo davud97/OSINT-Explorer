@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}OSINT Explorer | New Search{% endblock %}
+
+{% block content %}
+<header class="topbar">
+    <div>
+        <h1 class="page-title">New Search</h1>
+        <p class="page-description">
+            Search public intelligence indicators and review structured findings across integrated sources.
+        </p>
+    </div>
+</header>
+
+<section class="panel">
+    <div class="panel-header">
+        <h2>Search Workspace</h2>
+    </div>
+
+    <form action="{{ url_for('results') }}" method="POST" class="search-form">
+        <div class="form-row">
+            <div class="form-group form-group-wide">
+                <label for="query">Search Query</label>
+                <input
+                    type="text"
+                    id="query"
+                    name="query"
+                    placeholder="Enter domain, IP address, email, or username"
+                    required
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="query_type">Query Type</label>
+                <select id="query_type" name="query_type" required>
+                    <option value="">Select type</option>
+                    <option value="domain">Domain</option>
+                    <option value="ip">IP Address</option>
+                    <option value="email">Email</option>
+                    <option value="username">Username</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn-primary">Run Search</button>
+        </div>
+    </form>
+</section>
+
+<section class="panel">
+    <div class="panel-header">
+        <h2>Integrated Sources</h2>
+    </div>
+
+    <div class="source-grid">
+        <div class="source-item">GitHub API</div>
+        <div class="source-item">Shodan API</div>
+        <div class="source-item">AlienVault OTX API</div>
+        <div class="source-item">Censys API</div>
+        <div class="source-item">VirusTotal API</div>
+        <div class="source-item">theHarvester</div>
+        <div class="source-item">Subfinder and HTTPX </div>
+        <div class="source-item">WHOIS</div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,42 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# API keys / private files
+*.key
+*.pem
+*.crt
+
+# Node / React
+node_modules/
+dist/
+build/
+
+# Flask / Python instance files
+instance/
+*.db
+*.sqlite3
+
+# Logs
+*.log
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Test / cache folders
+.pytest_cache/
+.mypy_cache/
