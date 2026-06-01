@@ -62,6 +62,10 @@ So I built OSINT Explorer to solve that problem.
 
 ## 📸 Screenshots
 
+### ⚠️ **Sensitive Information Notice**
+
+### **Due to the sensitive nature of OSINT queries and investigation results, only selected screenshots have been included. Any sensitive query details, personal information, or private investigation data have been intentionally excluded from the public repository.**
+
 ### 🏠 Home
 ![Home](screenshots/Home.png)
 
