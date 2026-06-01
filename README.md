@@ -80,8 +80,7 @@ So I built OSINT Explorer to solve that problem.
 ### 🧪 Query
 ![Query](screenshots/Query.png)
 
-### 📧 Email Search
-![Email Search](screenshots/Email%20Search.png)
+
 
 ### 🌐 Domain Search
 ![Domain Search](screenshots/Domain%20Search.png)
