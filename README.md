@@ -58,6 +58,40 @@ Doing all of this manually can be slow, repetitive, and scattered across many to
 
 So I built OSINT Explorer to solve that problem.
 
+
+
+## 📸 Screenshots
+
+### 🏠 Home
+![Home](screenshots/Home.png)
+
+### 📡 Sources
+![Sources](screenshots/Sources.png)
+
+### 🕘 History
+![History](screenshots/History.png)
+
+### ⚙️ Settings
+![Settings](screenshots/Settings.png)
+
+### 🔎 Search Options
+![Search Options](screenshots/Search%20Options.png)
+
+### 🧪 Query
+![Query](screenshots/Query.png)
+
+### 📧 Email Search
+![Email Search](screenshots/Email%20Search.png)
+
+### 🌐 Domain Search
+![Domain Search](screenshots/Domain%20Search.png)
+
+### 📄 Reports
+![Reports](screenshots/Reports.png)
+
+---
+
+
 ### ✅ OSINT Explorer helps by:
 
 * Centralizing multiple OSINT checks into one dashboard
@@ -447,36 +481,7 @@ screenshots/
   08-dashboard-overview.png
 ```
 
-## 📸 Screenshots
 
-### 🏠 Home
-![Home](screenshots/Home.png)
-
-### 📡 Sources
-![Sources](screenshots/Sources.png)
-
-### 🕘 History
-![History](screenshots/History.png)
-
-### ⚙️ Settings
-![Settings](screenshots/Settings.png)
-
-### 🔎 Search Options
-![Search Options](screenshots/Search%20Options.png)
-
-### 🧪 Query
-![Query](screenshots/Query.png)
-
-### 📧 Email Search
-![Email Search](screenshots/Email%20Search.png)
-
-### 🌐 Domain Search
-![Domain Search](screenshots/Domain%20Search.png)
-
-### 📄 Reports
-![Reports](screenshots/Reports.png)
-
----
 
 ## ⚙️ How It Works Internally
 
